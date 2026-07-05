@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!-- Authoring rule (Dataverse import validates strictly; the webpack build does NOT catch these):
+     attribute values must be valid XML — escape < > & as &lt; &gt; &amp; — AND the *-key attributes
+     (display-name-key / description-key) must contain NO apostrophes: Dataverse's 'noAposStringType'
+     rejects them and `pac pcf push` fails at import. See the pcf-develop-deploy skill. -->
 <manifest>
   <control namespace="Bridge" constructor="SmokeTestPanel" version="0.0.1"
            display-name-key="Bridge Smoke Test Panel"
-           description-key="Bi-directional Xrm.Copilot ↔ MCP bridge starter: send a prompt to M365 Copilot and receive the agent's nudge back."
+           description-key="Bi-directional Xrm.Copilot ↔ MCP bridge starter: send a prompt to M365 Copilot and receive the agent nudge back."
            control-type="standard">
     <!-- BUMP this version before EVERY `pac pcf push` or UCI serves the stale bundle (pcf-develop-deploy skill). -->
 
@@ -18,10 +22,10 @@
               description-key="MCP/web server HTTPS base, e.g. https://xxxx-3101.euw.devtunnels.ms (= PUBLIC_BASE_URL)."
               of-type="SingleLine.Text" usage="input" required="true" />
     <property name="agentId" display-name-key="Agent Id (gptId)"
-              description-key="gptId of the M365 Copilot declarative agent (M365_TITLE_ID / T_<guid>, NOT TEAMS_APP_ID). Prefills the panel; editable there for smoke testing."
+              description-key="gptId of the M365 Copilot declarative agent (M365_TITLE_ID / T_&lt;guid&gt;, NOT TEAMS_APP_ID). Prefills the panel; editable there for smoke testing."
               of-type="SingleLine.Text" usage="input" required="false" />
     <property name="stateKey" display-name-key="State Key"
-              description-key="Capability token for GET /state (must equal the server's STATE_KEY)."
+              description-key="Capability token for GET /state (must equal the server STATE_KEY)."
               of-type="SingleLine.Text" usage="input" required="false" />
     <property name="autoRefreshSeconds" display-name-key="Auto-refresh Seconds"
               description-key="Poll /state every N seconds. 0 or blank = off (nudge + manual only)."

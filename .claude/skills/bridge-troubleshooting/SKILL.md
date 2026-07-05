@@ -28,6 +28,20 @@ in `ControlManifest.Input.xml` (patch is fine) **before every** `npm run build &
 hard-reload the app (Ctrl+Shift+R); if still stale, Publish all customizations and wait ~1 min. See
 `pcf-develop-deploy`.
 
+**The table shows the DEFAULT read-only grid, not your PCF (no console error).**
+→ The `CustomControlDefaultConfig` grid binding didn't apply. Two causes seen: **(a) wrong placement** —
+the `<CustomControlDefaultConfigs>` block was written inside the inner `<entity Name="…">` instead of on
+the **outer `<Entity>`** (sibling of `<FormXml>`/`<SavedQueries>`/`<RibbonDiffXml>`); import silently drops
+it. **(b) the carrier solution was deleted** — the binding rides in the unmanaged solution you imported it
+through, and deleting that solution removes the binding. Fix: re-run `bind-grid.mjs` (correct placement,
+handles the split `Entities/<table>/Entity.xml` layout), **keep** the carrier solution, and verify by
+re-exporting the solution and confirming the block sits under the outer `<Entity>`. See `pcf-develop-deploy`.
+
+**`pac pcf push` fails with `System.Xml.XmlException` or a `noAposStringType` XSD error.**
+→ The manifest has an XML- or XSD-invalid attribute value that the webpack build didn't catch: a raw
+`<`/`>`/`&`, or an apostrophe in a `display-name-key`/`description-key`. Escape the entities and remove
+apostrophes. See `pcf-develop-deploy` RULE 1b.
+
 **Component's own `fetch` of its `/data` (or `/state`) fails with a null-origin / CORS error.**
 → **iframe `sandbox` missing `allow-same-origin`.** A sandboxed iframe without it gets an opaque origin, so
 every self-fetch becomes a null-origin CORS failure. Fix: `sandbox="allow-scripts allow-same-origin"` on
