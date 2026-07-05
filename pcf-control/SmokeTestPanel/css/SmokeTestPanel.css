@@ -1,0 +1,138 @@
+.bsp-root {
+  --fg: #1c2431;
+  --muted: #6b7280;
+  --bg: #f5f7fa;
+  --panel: #ffffff;
+  --accent: #3b82f6;
+  --border: rgba(20, 30, 50, 0.12);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 100%;
+  padding: 18px 20px 24px;
+  overflow: auto;
+}
+.bsp-root *,
+.bsp-root *::before,
+.bsp-root *::after {
+  box-sizing: border-box;
+}
+
+.bsp-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.bsp-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 4px 0 16px;
+  max-width: 640px;
+}
+
+.bsp-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.bsp-input {
+  flex: 1 1 320px;
+  min-width: 220px;
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--fg);
+}
+.bsp-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.bsp-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 8px 14px;
+  transition: 0.15s;
+}
+.bsp-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.bsp-btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.bsp-btn--primary:hover {
+  filter: brightness(1.05);
+  color: #fff;
+}
+
+.bsp-status {
+  min-height: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 4px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.bsp-status--ok {
+  color: #0f9d58;
+}
+.bsp-status--err {
+  color: #d9483b;
+}
+.bsp-status--busy {
+  color: var(--accent);
+}
+/* Spinner on the in-progress states — inherits the status color via currentColor. */
+.bsp-status--busy::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: bsp-spin 0.6s linear infinite;
+}
+@keyframes bsp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.bsp-received {
+  font-size: 14px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--muted);
+}
+.bsp-received--ok {
+  border-style: solid;
+  border-color: #0f9d58;
+  color: var(--fg);
+}
+.bsp-state {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <control namespace="Bridge" constructor="SmokeTestPanel" version="0.0.1"
+           display-name-key="Bridge Smoke Test Panel"
+           description-key="Bi-directional Xrm.Copilot ↔ MCP bridge starter: send a prompt to M365 Copilot and receive the agent's nudge back."
+           control-type="standard">
+    <!-- BUMP this version before EVERY `pac pcf push` or UCI serves the stale bundle (pcf-develop-deploy skill). -->
+
+    <!-- Premium: this control calls the MCP/web server over HTTPS. The <domain> MUST equal the
+         server's PUBLIC_BASE_URL and the serverBaseUrl property below. Changing it = edit here +
+         version bump + push. Replace with your HTTPS devtunnel base. -->
+    <external-service-usage enabled="true">
+      <domain>https://REPLACE-with-your-devtunnel-3101.euw.devtunnels.ms</domain>
+    </external-service-usage>
+
+    <!-- Input properties, configured on the control at bind time (see bind-grid.mjs). -->
+    <property name="serverBaseUrl" display-name-key="Server Base URL"
+              description-key="MCP/web server HTTPS base, e.g. https://xxxx-3101.euw.devtunnels.ms (= PUBLIC_BASE_URL)."
+              of-type="SingleLine.Text" usage="input" required="true" />
+    <property name="agentId" display-name-key="Agent Id (gptId)"
+              description-key="gptId of the M365 Copilot declarative agent (M365_TITLE_ID / T_<guid>, NOT TEAMS_APP_ID). Prefills the panel; editable there for smoke testing."
+              of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="stateKey" display-name-key="State Key"
+              description-key="Capability token for GET /state (must equal the server's STATE_KEY)."
+              of-type="SingleLine.Text" usage="input" required="false" />
+    <property name="autoRefreshSeconds" display-name-key="Auto-refresh Seconds"
+              description-key="Poll /state every N seconds. 0 or blank = off (nudge + manual only)."
+              of-type="Whole.None" usage="input" required="false" />
+
+    <!-- Dataset anchor: only there to host the control full-page. Records are ignored. -->
+    <data-set name="bridgeGrid" display-name-key="Bridge Anchor"
+              description-key="Dataset anchor used to host the control full-page. Records are ignored." />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <css path="css/SmokeTestPanel.css" order="1" />
+    </resources>
+
+    <feature-usage>
+      <uses-feature name="Utility" required="true" />
+    </feature-usage>
+  </control>
+</manifest>

@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# secrets & local state (never commit)
+.env
+**/.env
+mcp-server/state.json
+
+# build outputs
+mcp-server/dist/
+mcp-server/logs/
+
+# PCF build artifacts
+pcf-control/out/
+pcf-control/obj/
+pcf-control/bin/
+pcf-control/.vs/
+pcf-control/generated/
+
+# misc
+*.log
+.DS_Store
