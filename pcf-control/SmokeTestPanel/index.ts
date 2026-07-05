@@ -22,7 +22,13 @@ interface CopilotApi {
   openM365CopilotPanel?: () => Promise<void> | void;
   sendPromptToM365Copilot?: (text: string, options?: { autoSubmit?: boolean; gptId?: string }) => Promise<void> | void;
   addActionHandler?: (action: string, handler: (data: unknown) => void) => void;
-  getCurrentAgent?: () => unknown;
+  // Returns a Promise (NOT a sync value). Resolves to { agentId, mode } or undefined when the agent
+  // state isn't known yet. agentId is the gptId (T_<guid>) when an agent is active, else null.
+  getCurrentAgent?: () => Promise<M365CopilotAgent | undefined>;
+}
+interface M365CopilotAgent {
+  agentId: string | null;
+  mode: "agentPage" | "mentioned" | null;
 }
 function copilotApi(): CopilotApi | undefined {
   return (window as unknown as { Xrm?: { Copilot?: CopilotApi } }).Xrm?.Copilot;
@@ -183,16 +189,21 @@ export class SmokeTestPanel implements ComponentFramework.StandardControl<IInput
     }
   }
 
-  private revealAgent(): void {
+  private async revealAgent(): Promise<void> {
     try {
-      const agent = copilotApi()?.getCurrentAgent?.();
+      // getCurrentAgent() returns a Promise — must await, or JSON.stringify(<Promise>) prints "{}".
+      const agent = await copilotApi()?.getCurrentAgent?.();
       if (agent == null) {
         this.setStatus("getCurrentAgent() returned nothing (open the Copilot pane first).", "err");
         return;
       }
-      const id = (agent as { gptId?: string; id?: string }).gptId ?? (agent as { id?: string }).id ?? JSON.stringify(agent);
-      this.gptInput.value = typeof id === "string" ? id : String(id);
-      this.setStatus("Filled gptId from getCurrentAgent().", "ok");
+      if (!agent.agentId) {
+        // Resolved, but on mainline Copilot (mode null) — no agent to reveal.
+        this.setStatus("On mainline M365 Copilot — no active agent (open an agent first).", "err");
+        return;
+      }
+      this.gptInput.value = agent.agentId;
+      this.setStatus(`Filled gptId from getCurrentAgent() (mode: ${agent.mode ?? "?"}).`, "ok");
     } catch (err) {
       this.setStatus("getCurrentAgent() failed: " + this.msg(err), "err");
     }
