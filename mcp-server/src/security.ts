@@ -1,6 +1,6 @@
 /**
- * Guards (§8 of spec.md): capability-token checks + SQL / render-core sanitization.
- * Demo-grade — see spec §3.3.
+ * Guards: the capability-token check (load-bearing for GET /state) plus sanitizer utilities carried
+ * over from the source project for demos that generate SQL or LLM render cores. Demo-grade.
  */
 
 /** Constant-time-ish token comparison (both must be non-empty and equal). */

@@ -32,7 +32,8 @@
  *     --env https://org.crm.dynamics.com \
  *     --table cr19f_dashboard \
  *     --control cr19f_Bridge.SmokeTestPanel \        # <prefix>_<Namespace>.<Constructor>
- *     --dataset grid \                               # the manifest data-set name
+ *     --dataset bridgeGrid \                         # MUST equal the manifest's <data-set name>
+
  *     --publisher-prefix cr19f \                     # only needed with --create-solution
  *     --solution MyExistingSolution \               # OR: --create-solution
  *     --prop serverBaseUrl=https://xxxx-3101.euw.devtunnels.ms \
@@ -178,8 +179,13 @@ if (args.createSolution) {
   solutionName = `BindGridTemp${Date.now().toString().slice(-6)}`;
   const projDir = join(work, "proj");
   pac(["solution", "init", "--publisher-name", "bindgrid", "--publisher-prefix", args["publisher-prefix"], "--outputDirectory", projDir]);
+  // `pac solution init` derives the solution's UniqueName from the scaffold, not from us — force ours
+  // so the add-solution-component / export calls below resolve.
+  const solXml = join(projDir, "src", "Other", "Solution.xml");
+  writeFileSync(solXml, readFileSync(solXml, "utf8").replace(/<UniqueName>[^<]*<\/UniqueName>/, `<UniqueName>${solutionName}</UniqueName>`));
   // Pack + import the empty solution to create it in the org, then add the table as a component.
-  pac(["solution", "pack", "--zipfile", join(work, "empty.zip"), "--folder", projDir, "--packagetype", "Unmanaged"]);
+  // NB: the packable solution layout lives under src/ in an init scaffold.
+  pac(["solution", "pack", "--zipfile", join(work, "empty.zip"), "--folder", join(projDir, "src"), "--packagetype", "Unmanaged"]);
   pac(["solution", "import", "--path", join(work, "empty.zip"), "--force-overwrite", "--publish-changes"]);
   // Entity componentType = 1. --component expects the metadata id; many pac builds also accept the
   // logical name here. If your pac rejects the name, look up the entity's MetadataId first.

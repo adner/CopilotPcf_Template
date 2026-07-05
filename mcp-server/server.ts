@@ -2,7 +2,7 @@
  * MCP plane — the viewer resource + tools. This template ships ONE worked UI tool (`smoke_test`)
  * that proves the agent → PCF direction of the bridge, plus `src/tools/example-tool.stub.ts` showing
  * the pattern for real demo tools. Add tools here (see the mcp-apps-tool-dev skill), then re-run the
- * 3-file DashboardAgent sync (declarative-agent-sync skill) so Copilot can call them.
+ * 3-file declarative-agent sync (declarative-agent-sync skill) so Copilot can call them.
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerAppTool, registerAppResource, RESOURCE_MIME_TYPE } from "@modelcontextprotocol/ext-apps/server";

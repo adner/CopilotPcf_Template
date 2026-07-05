@@ -4,8 +4,8 @@
  * (/health is registered in main.ts.) Add your own component-data / served-tile endpoints here per
  * demo — see the mcp-apps-tool-dev and bidirectional-pcf-agent skills. On any page Power Apps will
  * iframe, set `Content-Security-Policy: frame-ancestors ${config.frameAncestors}` and serve the tile
- * with `sandbox="allow-scripts allow-same-origin"` from the PCF side (or its self-fetch 404s on a
- * null origin).
+ * with `sandbox="allow-scripts allow-same-origin"` from the PCF side (or its self-fetch is blocked by
+ * CORS with a null origin).
  */
 import { Router, type Request, type Response } from "express";
 import { config } from "./config.js";

@@ -1,7 +1,7 @@
 /**
  * EXAMPLE STUB — copy this shape to add a real tool. NOT registered by default. Wire it into
  * createServer() in ../../server.ts (call `registerExampleTool(server)`), then re-run the 3-file
- * DashboardAgent sync so Copilot can actually call it (see the declarative-agent-sync skill).
+ * declarative-agent sync so Copilot can actually call it (see the declarative-agent-sync skill).
  *
  * Two flavours:
  *   • UI tool  — `registerAppTool(...)` with `_meta.ui.resourceUri`; returns `structuredContent.html`
