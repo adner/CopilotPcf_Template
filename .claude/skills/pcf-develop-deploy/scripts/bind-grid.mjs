@@ -91,9 +91,13 @@ const props = args.prop.map((spec) => {
 
 // ---------- helpers --------------------------------------------------------
 function fail(msg) { console.error(`\n✖ bind-grid: ${msg}\n`); process.exit(1); }
+// On Windows the CLI is `pac.cmd`, which Node cannot spawn without a shell (CreateProcess can't run
+// a batch file directly). Use the .cmd name + shell there; plain `pac` + no shell elsewhere.
+const IS_WIN = process.platform === "win32";
+const PAC = IS_WIN ? "pac.cmd" : "pac";
 function pac(subargs) {
   console.error(`→ pac ${subargs.join(" ")}`);
-  return execFileSync("pac", subargs, { stdio: ["ignore", "inherit", "inherit"] });
+  return execFileSync(PAC, subargs, { stdio: ["ignore", "inherit", "inherit"], shell: IS_WIN });
 }
 function xmlEscape(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -149,6 +153,32 @@ function patchCustomizations(xml) {
   return xml.slice(0, target.index) + block + xml.slice(target.index + target.block.length);
 }
 
+// Modern pac (>= ~2.x) splits each table into its own Entities/<table>/Entity.xml with an inner
+// <entity Name="…">…</entity>; CustomControlDefaultConfigs is a child of that <entity>. (Older pac
+// inlined the <Entity> in customizations.xml — patchCustomizations() handles that fallback.)
+function entityXmlPath(dir, table) {
+  const entitiesDir = join(dir, "Entities");
+  if (!existsSync(entitiesDir)) return null;
+  for (const e of readdirSync(entitiesDir, { withFileTypes: true })) {
+    if (e.isDirectory() && e.name.toLowerCase() === table.toLowerCase()) {
+      const p = join(entitiesDir, e.name, "Entity.xml");
+      if (existsSync(p)) return p;
+    }
+  }
+  return null;
+}
+
+function patchEntityXml(xml) {
+  const configs = customControlConfigsBlock();
+  const existing = /<CustomControlDefaultConfigs[\s\S]*?<\/CustomControlDefaultConfigs>|<CustomControlDefaultConfigs\s*\/>/;
+  if (existing.test(xml)) return xml.replace(existing, configs);
+  // CustomControlDefaultConfigs is a child of the OUTER <Entity> — a sibling of <FormXml>/<SavedQueries>/
+  // <RibbonDiffXml>, right before </Entity> — NOT a child of the inner <entity Name="…">. This mirrors
+  // how Dataverse itself exports a grid-control binding; putting it inside <entity> makes import drop it.
+  if (!/<\/Entity>\s*$/.test(xml)) fail("No trailing </Entity> in Entity.xml — unexpected solution format.");
+  return xml.replace(/<\/Entity>\s*$/, `${configs}</Entity>`);
+}
+
 function findCustomizationsXml(dir) {
   // pac solution unpack writes customizations.xml at the unpack root.
   const direct = join(dir, "customizations.xml");
@@ -199,11 +229,17 @@ pac(["solution", "export", "--name", solutionName, "--path", exportZip, "--manag
 // 2. Unpack.
 pac(["solution", "unpack", "--zipfile", exportZip, "--folder", unpackDir, "--packagetype", "Unmanaged", "--allowDelete", "true"]);
 
-// 3. Patch customizations.xml.
-const custPath = findCustomizationsXml(unpackDir);
-const patched = patchCustomizations(readFileSync(custPath, "utf8"));
-writeFileSync(custPath, patched);
-console.error(`✓ patched ${custPath}`);
+// 3. Patch the table's customization XML. Modern pac splits each table into
+//    Entities/<table>/Entity.xml; older pac inlined <Entity> in customizations.xml. Handle both.
+const entityPath = entityXmlPath(unpackDir, args.table);
+if (entityPath) {
+  writeFileSync(entityPath, patchEntityXml(readFileSync(entityPath, "utf8")));
+  console.error(`✓ patched ${entityPath}`);
+} else {
+  const custPath = findCustomizationsXml(unpackDir);
+  writeFileSync(custPath, patchCustomizations(readFileSync(custPath, "utf8")));
+  console.error(`✓ patched ${custPath}`);
+}
 
 // 4. Repack + import with publish (import regenerates controldescriptionjson from the XML).
 pac(["solution", "pack", "--zipfile", repackZip, "--folder", unpackDir, "--packagetype", "Unmanaged"]);

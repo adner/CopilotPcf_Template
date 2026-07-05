@@ -33,6 +33,18 @@ If still stale after a bump+push+hard-reload: maker portal → **Publish all cus
 Changing the `external-service-usage` domain (e.g. a new devtunnel URL) is a **manifest change** → same
 rule: edit + version bump + push.
 
+## RULE 1b — Manifest attribute values must be XML-valid AND Dataverse-XSD-valid
+
+`npm run build` (webpack/pcf-scripts) uses a **lenient** parser and will happily compile a manifest that
+`pac pcf push` then rejects. Two traps, both in `*-key` attributes (`display-name-key`, `description-key`):
+
+- **No raw `<` `>` `&`** in attribute values — escape as `&lt;` `&gt;` `&amp;` (e.g. write `T_&lt;guid&gt;`,
+  not `T_<guid>`). A raw `<` fails XML parse → `pac` dies with `System.Xml.XmlException` while *reading* the
+  manifest (before any import).
+- **No apostrophes** in those attributes — Dataverse's `noAposStringType` datatype rejects them, so the
+  **solution import** fails with `'…' is invalid according to its datatype 'noAposStringType'`. Reword
+  (`the server's STATE_KEY` → `the server STATE_KEY`). (Unicode like `↔` is fine.)
+
 ## RULE 2 — Binding a dataset PCF as a table's grid control is done via solution XML, not the UI
 
 To host a dataset PCF full-page, it must be set as the **read-only grid control** of a hosting table.
@@ -65,6 +77,24 @@ node .claude/skills/pcf-develop-deploy/scripts/bind-grid.mjs \
 
 **Once bound, the binding persists across normal code pushes** — a version bump + push is enough. Only
 re-run `bind-grid.mjs` when a manifest **property** or the `data-set`/`of-type` changes.
+
+### Binding gotchas that make it silently fail (symptom: the DEFAULT grid renders, no error)
+
+- **`CustomControlDefaultConfigs` goes on the OUTER `<Entity>`, not the inner `<entity>`.** Modern
+  `pac solution unpack` splits each table into `Entities/<table>/Entity.xml`; the block must be a sibling
+  of `<FormXml>`/`<SavedQueries>`/`<RibbonDiffXml>` (i.e. right before `</Entity>`), **not** a child of the
+  inner `<entity Name="…">`. Put it inside `<entity>` and **import silently drops it** → default grid.
+  `bind-grid.mjs` now handles both the split layout and the correct placement.
+- **Do NOT delete the carrier solution.** The binding rides in whatever unmanaged solution you imported it
+  through (`--create-solution` makes a temp `BindGridTemp…`). Deleting that solution **removes the
+  `CustomControlDefaultConfig`** and the default grid comes back. Keep it, or bind through a solution you
+  intend to keep (`--solution <name>`).
+- **Verify by export, not by the classic UI.** Re-export the solution, unpack, and confirm a
+  `<CustomControlDefaultConfigs>` block sits under the table's outer `<Entity>`. The classic UI lies either
+  way; a runtime hard-reload (Ctrl+Shift+R) or **Publish all customizations** shows the real result.
+- **Windows:** `bind-grid.mjs` shells out to `pac` — on Windows the CLI is `pac.cmd`, which Node can only
+  spawn via a shell; the script handles this. If it errors `spawnSync pac ENOENT`, your `pac` isn't the
+  `.cmd` on PATH.
 
 ## Prerequisites
 - `pac auth create --url https://<org>.crm.dynamics.com` (an expired refresh token → `AADSTS700082`;
