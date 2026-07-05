@@ -57,7 +57,8 @@ both use `eventName:"powerapps.copilot.chat.action"`, `action:"template.smoketes
 
 - Add / change a **server tool** → `mcp-apps-tool-dev`, **then** `declarative-agent-sync`.
 - **PCF** build / push / grid-binding → `pcf-develop-deploy` (bump the manifest version every push).
-- Query Dataverse / create demo **tables** → `dataverse-mcp-usage`.
+- Query Dataverse / create demo **tables** → `dataverse-mcp-usage`; Dataverse MCP server **not
+  connected/configured yet** → `dataverse-mcp-setup`.
 - Bridge / nudge / shared-state **design** → `bidirectional-pcf-agent`, `xrm-copilot-integration`.
 - **Loop broken** (blank widget, nudge not arriving, mixed content, stale bundle) →
   `bridge-troubleshooting`.

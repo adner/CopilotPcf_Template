@@ -83,6 +83,7 @@ Claude Code loads these on demand while you build a demo from this template:
 - **xrm-copilot-integration** — the `Xrm.Copilot` API surface from both a PCF and an MCP Apps widget; the gptId gotcha.
 - **pcf-develop-deploy** — pac dev/deploy, the version-bump rule, and the scripted grid-binding (`bind-grid.mjs`).
 - **dataverse-mcp-usage** — query Dataverse + create supporting demo tables via the Dataverse MCP server.
+- **dataverse-mcp-setup** — enable the Dataverse MCP server on an environment and connect a non-Microsoft client (Entra app, mcp.tools, PKCE).
 - **bidirectional-pcf-agent** — the nudge protocol, dual registration, shared state, and the HTTPS/CSP/sandbox constraints.
 - **mcp-apps-tool-dev** — adding/modifying tools on the server (the core loop of every new demo).
 - **declarative-agent-sync** — the ATK flow + the three-file tool-enumeration sync that fails silently.

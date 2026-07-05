@@ -10,8 +10,8 @@ description: >-
 
 # Using the Dataverse MCP server
 
-This template assumes a **Dataverse MCP server is set up and accessible to the agent** (the connection
-is provided by your environment — this skill is about *using* it, not configuring it). Typical tools:
+This template assumes a **Dataverse MCP server is set up and accessible to the agent** — if it isn't
+yet, run the **dataverse-mcp-setup** skill first; this skill is about *using* it, not configuring it. Typical tools:
 `read_query`, `describe`, `search` / `search_data`, `create_table`, `update_table`, `create_record`,
 `update_record`, `delete_record`, `delete_table`.
 
