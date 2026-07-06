@@ -3,18 +3,19 @@ name: dataverse-mcp-setup
 description: >-
   Use when the Dataverse MCP server is not yet reachable from the agent — enabling it on a Power
   Platform environment, registering the Entra ID client app (mcp.tools permission, PKCE, redirect
-  URIs), allow-listing the client, and connecting Claude Code / Claude Desktop / GitHub Copilot to
-  /api/mcp. Triggers: "set up the Dataverse MCP server", "connect Claude to Dataverse", "mcp.tools",
-  "api/mcp", "Dataverse MCP not connected", "enable MCP on the environment", "add the Dataverse MCP
-  server".
+  URIs), allow-listing the client, and connecting Codex CLI / Claude Code / Claude Desktop / GitHub
+  Copilot to /api/mcp. Triggers: "set up the Dataverse MCP server", "connect Codex to Dataverse",
+  "connect Claude to Dataverse", "codex mcp login", "mcp.tools", "api/mcp", "Dataverse MCP not
+  connected", "enable MCP on the environment", "add the Dataverse MCP server".
 ---
 
 # Setting up the Dataverse MCP server (non-Microsoft clients)
 
-Connect a third-party MCP client (Claude Code, Claude Desktop, GitHub Copilot) directly to Dataverse's
-**remote Streamable-HTTP endpoint**. Distilled from
+Connect a third-party MCP client (Codex CLI, Claude Code, Claude Desktop, GitHub Copilot) directly to
+Dataverse's **remote Streamable-HTTP endpoint**. Distilled from
 [nullpointer.se — Dataverse MCP with non-Microsoft clients](https://nullpointer.se/dv-mcp-non-microsoft.html)
-plus the [MS Learn MCP docs](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-mcp).
+plus the [MS Learn MCP docs](https://learn.microsoft.com/en-us/power-apps/maker/data-platform/data-platform-mcp)
+and local Codex CLI behavior observed against Dataverse protected-resource metadata.
 
 **Key insight (the article's main point):** use the **remote endpoint + PKCE** — only an Application ID
 is needed, **no client secret**. Ignore older docs that recommend a local STDIO proxy for Claude
@@ -36,8 +37,8 @@ must be explicitly enabled. Requires the **Power Platform administrator** role.
 2. Find **Dataverse Model Context Protocol**; ensure **Allow MCP clients to interact with Dataverse
    MCP server** is on.
 3. Select **Advanced Settings** → the list of MCP client records appears. Open the client you need,
-   set **Is Enabled** = **Yes**, **Save & Close**. For a custom Entra app (the Claude path below), add
-   its **Application ID** to this allowed-clients list.
+   set **Is Enabled** = **Yes**, **Save & Close**. For a custom Entra app, add its **Application ID**
+   to this allowed-clients list.
 
 Note: this allow-listing gates only the `/api/mcp` agent entrypoint (MCP-named custom APIs are regular
 Dataverse APIs and are not restricted by it).
@@ -50,12 +51,51 @@ Dataverse APIs and are not restricted by it).
 3. **Manage → Authentication (Preview) → Settings** → set **Allow public client flows** = **Enabled**
    (this is what makes secret-less PKCE work).
 4. Add the **redirect URIs** for every client you'll use:
+   - Codex CLI: use the exact loopback redirect URI Codex sends during `codex mcp login` (see below).
    - `https://claude.ai/api/mcp/auth_callback` — Claude Desktop
    - `http://localhost/callback` — Claude Code
    - `http://127.0.0.1` — GitHub Copilot app/CLI
 5. Note the **Application (client) ID** — it's the only credential any client needs.
 
 ## 3. Connect the client
+
+**Codex CLI**:
+
+1. Add or edit the server in `~/.codex/config.toml`:
+
+   ```toml
+   [mcp_servers.DvMCPServer]
+   url = "https://<org>.crm<region>.dynamics.com/api/mcp"
+   scopes = ["https://<org>.crm<region>.dynamics.com/api/mcp/mcp.tools"]
+
+   [mcp_servers.DvMCPServer.oauth]
+   client_id = "<APPLICATION_ID>"
+   ```
+
+2. Do **not** set `oauth_resource` and do not pass `--oauth-resource` for Dataverse. The Dataverse
+   protected-resource metadata already advertises a `resource`, and adding another one causes Entra
+   error `AADSTS9000411: The parameter 'resource' is duplicated`.
+3. Run:
+
+   ```bash
+   codex mcp login DvMCPServer
+   ```
+
+   If you pass scopes explicitly, pass the fully qualified scope:
+
+   ```bash
+   codex mcp login --scopes "https://<org>.crm<region>.dynamics.com/api/mcp/mcp.tools" DvMCPServer
+   ```
+
+4. Register the redirect URI Codex uses in the Entra app if Entra rejects it. Codex uses a loopback
+   callback like `http://127.0.0.1:<port>/callback/<server-id>`. If `mcp_oauth_callback_port` is not
+   set, the port is ephemeral and may change. To stabilize it, add a top-level setting:
+
+   ```toml
+   mcp_oauth_callback_port = 4321
+   ```
+
+   Then retry login and register the full derived redirect URI, including `/callback/<server-id>`.
 
 **Claude Code** (one command, then authenticate):
 
@@ -93,3 +133,10 @@ Tools exposed: `search_data` (data search), `search` (metadata/schema search), `
   access.
 - Auth failures usually mean one of: public client flows not enabled (step 2.3), the redirect URI for
   *that specific client* missing (step 2.4), or the app not allow-listed on the environment (step 1.3).
+- **Codex scope mismatch:** `AADSTS9010010: The resource parameter provided in the request doesn't
+  match with the requested scopes` means the OAuth request used bare `mcp.tools` while Dataverse's
+  advertised resource is `https://<org>.crm<region>.dynamics.com/api/mcp`. Use the fully qualified
+  scope `https://<org>.crm<region>.dynamics.com/api/mcp/mcp.tools`.
+- **Codex duplicate resource:** `AADSTS9000411: The parameter 'resource' is duplicated` means
+  `oauth_resource` or `--oauth-resource` was added even though Dataverse metadata already provided a
+  resource. Remove the override.

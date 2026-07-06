@@ -42,7 +42,7 @@ Out of the box, one button proves **both directions of the loop**.
 | `mcp-server/` | Node + TS MCP (Apps) server + plain web server. Reusable plumbing + the worked `smoke_test` tool + `src/tools/example-tool.stub.ts`. |
 | `pcf-control/` | Full-page dataset PCF `Bridge.SmokeTestPanel` — the bridge send/receive + smoke-test panel. |
 | `declarative-agent/` | Empty — scaffold the ATK agent here (see its README + `declarative-agent-sync` skill). |
-| `.claude/skills/` | Seven bundled skills carrying the hard-won lessons (see below). |
+| `.agents/skills/` | Bundled skills carrying the hard-won lessons (see below). |
 
 ## Quick start (host-free, ~2 min)
 
@@ -76,9 +76,9 @@ You need: an HTTPS **devtunnel** (localhost is blocked as mixed content in the H
    `smoke_test` card → the panel shows **"✓ round-trip complete"**; **Fetch state** shows the ping
    counter climb.
 
-## Bundled skills (`.claude/skills/`)
+## Bundled skills (`.agents/skills/`)
 
-Claude Code loads these on demand while you build a demo from this template:
+Agents load these on demand while you build a demo from this template:
 
 - **xrm-copilot-integration** — the `Xrm.Copilot` API surface from both a PCF and an MCP Apps widget; the gptId gotcha.
 - **pcf-develop-deploy** — pac dev/deploy, the version-bump rule, and the scripted grid-binding (`bind-grid.mjs`).
@@ -95,4 +95,4 @@ Claude Code loads these on demand while you build a demo from this template:
    `server.ts`; re-run the agent sync.
 2. Replace the smoke-test panel in `pcf-control/` with your component; keep the bridge wiring.
 3. Create supporting Dataverse tables via the Dataverse MCP server.
-4. Fill in the "fill in as your demo grows" section of `CLAUDE.md`.
+4. Fill in the "fill in as your demo grows" section of `AGENT.md`.

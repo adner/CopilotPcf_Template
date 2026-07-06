@@ -1,7 +1,7 @@
-# CLAUDE.md
+# AGENT.md
 
-Guidance for Claude Code working in this repo. **Authoring rule:** procedural knowledge → a skill in
-`.claude/skills/`; always-true, load-bearing facts → this file; human narrative (diagrams, setup
+Guidance for agents working in this repo. **Authoring rule:** procedural knowledge → a skill in
+`.agents/skills/`; always-true, load-bearing facts → this file; human narrative (diagrams, setup
 walkthrough) → `README.md`. Keep this file a map, not a manual.
 
 ## What this repo is

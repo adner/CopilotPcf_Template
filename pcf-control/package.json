@@ -11,7 +11,7 @@
     "start": "pcf-scripts start",
     "start:watch": "pcf-scripts start watch",
     "refreshTypes": "pcf-scripts refreshTypes",
-    "bind": "node ../.claude/skills/pcf-develop-deploy/scripts/bind-grid.mjs"
+    "bind": "node ../.agents/skills/pcf-develop-deploy/scripts/bind-grid.mjs"
   },
   "dependencies": {
   },
