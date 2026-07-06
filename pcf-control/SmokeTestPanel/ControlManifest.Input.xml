@@ -17,7 +17,7 @@
       <domain>https://REPLACE-with-your-devtunnel-3101.euw.devtunnels.ms</domain>
     </external-service-usage>
 
-    <!-- Input properties, configured on the control at bind time (see bind-grid.mjs). -->
+    <!-- Input properties, configured on the control at bind time (see pcf-control/binding-template). -->
     <property name="serverBaseUrl" display-name-key="Server Base URL"
               description-key="MCP/web server HTTPS base, e.g. https://xxxx-3101.euw.devtunnels.ms (= PUBLIC_BASE_URL)."
               of-type="SingleLine.Text" usage="input" required="true" />

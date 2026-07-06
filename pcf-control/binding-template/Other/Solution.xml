@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImportExportXml version="9.2.0.0" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="BridgeTemplate" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SolutionManifest>
+    <UniqueName>{{SOLUTION_UNIQUE_NAME}}</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="{{SOLUTION_DISPLAY_NAME}}" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions />
+    <Version>{{SOLUTION_VERSION}}</Version>
+    <Managed>0</Managed>
+    <Publisher>
+      <UniqueName>{{PUBLISHER_NAME}}</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="{{PUBLISHER_DISPLAY_NAME}}" languagecode="1033" />
+      </LocalizedNames>
+      <Descriptions />
+      <CustomizationPrefix>{{PUBLISHER_PREFIX}}</CustomizationPrefix>
+      <CustomizationOptionValuePrefix>{{PUBLISHER_OPTION_VALUE_PREFIX}}</CustomizationOptionValuePrefix>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="1" schemaName="{{TABLE_LOGICAL_NAME}}" behavior="0" />
+    </RootComponents>
+    <MissingDependencies />
+  </SolutionManifest>
+</ImportExportXml>

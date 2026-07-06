@@ -41,6 +41,7 @@ Out of the box, one button proves **both directions of the loop**.
 |---|---|
 | `mcp-server/` | Node + TS MCP (Apps) server + plain web server. Reusable plumbing + the worked `smoke_test` tool + `src/tools/example-tool.stub.ts`. |
 | `pcf-control/` | Full-page dataset PCF `Bridge.SmokeTestPanel` — the bridge send/receive + smoke-test panel. |
+| `pcf-control/binding-template/` | Minimal solution XML template for binding the PCF as a table grid control. |
 | `declarative-agent/` | Empty — scaffold the ATK agent here (see its README + `declarative-agent-sync` skill). |
 | `.agents/skills/` | Bundled skills carrying the hard-won lessons (see below). |
 
@@ -65,8 +66,10 @@ You need: an HTTPS **devtunnel** (localhost is blocked as mixed content in the H
    `mcp-server/.env` to the `https://…devtunnels.ms` base; `npm run build && npm run serve`.
 2. **PCF.** In `pcf-control/`: set the manifest `external-service-usage` domain to the tunnel base
    (bump the control version), `npm install && npm run build`, `pac pcf push --publisher-prefix <p>`,
-   then bind it as a table's read-only grid control with `npm run bind -- …` (see the
-   `pcf-develop-deploy` skill — the classic picker won't list a dataset PCF, so this is scripted).
+   then bind it as a table's read-only grid control with `npm run bind -- -- …` using the checked-in
+   solution XML template (see the `pcf-develop-deploy` skill — the classic picker won't list a dataset
+   PCF reliably). If a table needs an export/patch/import round trip instead, use
+   `npm run bind:roundtrip -- -- …`.
    Set the control's `serverBaseUrl` = the tunnel base, `stateKey` = your `STATE_KEY`, `agentId` =
    the agent's gptId.
 3. **Agent.** Scaffold the declarative agent with ATK in `declarative-agent/`, point its
@@ -81,7 +84,7 @@ You need: an HTTPS **devtunnel** (localhost is blocked as mixed content in the H
 Agents load these on demand while you build a demo from this template:
 
 - **xrm-copilot-integration** — the `Xrm.Copilot` API surface from both a PCF and an MCP Apps widget; the gptId gotcha.
-- **pcf-develop-deploy** — pac dev/deploy, the version-bump rule, and the scripted grid-binding (`bind-grid.mjs`).
+- **pcf-develop-deploy** — pac dev/deploy, the version-bump rule, and grid-binding via solution XML template or fallback round-trip script.
 - **dataverse-mcp-usage** — query Dataverse + create supporting demo tables via the Dataverse MCP server.
 - **dataverse-mcp-setup** — enable the Dataverse MCP server on an environment and connect a non-Microsoft client (Entra app, mcp.tools, PKCE).
 - **bidirectional-pcf-agent** — the nudge protocol, dual registration, shared state, and the HTTPS/CSP/sandbox constraints.

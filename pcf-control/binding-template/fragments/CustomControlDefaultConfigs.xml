@@ -1,0 +1,12 @@
+<CustomControlDefaultConfigs>
+  <CustomControlDefaultConfig>
+    <ControlDescriptionXML>
+      <controlDescriptions>
+        <controlDescription>
+{{CUSTOM_CONTROLS}}
+        </controlDescription>
+      </controlDescriptions>
+    </ControlDescriptionXML>
+    <IntroducedVersion>1.0</IntroducedVersion>
+  </CustomControlDefaultConfig>
+</CustomControlDefaultConfigs>

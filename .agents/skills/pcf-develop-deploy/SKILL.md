@@ -4,9 +4,9 @@ description: >-
   Use when building, versioning, deploying, or binding a PCF (Power Apps Component Framework) control
   with the pac CLI — especially a dataset control hosted full-page as a table's grid. Covers the
   mandatory version bump before every push (stale-bundle cause), the build→push→publish→reload loop, and
-  the brittle-binding workaround (the classic picker won't list dataset PCFs) via the bundled
-  bind-grid.mjs script. Triggers: "pac pcf push", "deploy the control", "PCF version", "stale bundle",
-  "bind the control to the table", "customcontroldefaultconfig", "grid control won't show up".
+  binding via the checked-in solution XML template, with bind-grid.mjs kept as the export-roundtrip
+  fallback. Triggers: "pac pcf push", "deploy the control", "PCF version", "stale bundle", "bind the
+  control to the table", "binding-template", "customcontroldefaultconfig", "grid control won't show up".
 ---
 
 # PCF develop & deploy (pac CLI)
@@ -51,19 +51,60 @@ To host a dataset PCF full-page, it must be set as the **read-only grid control*
 The classic "Add control" customization picker **will not list your PCF dataset control** (a known
 classic-editor flakiness) — the built-in Power Apps grid control shows, yours doesn't.
 
-Do **not** fight the UI. Author the binding directly in the `customcontroldefaultconfig` via a solution
-round-trip, on **all three form factors (0/1/2)**, with the control's static input-property values.
-Importing regenerates the `controldescriptionjson` from the XML — patching XML alone (e.g. a raw
-`update_record`) leaves stale JSON, so always go through **import with `--publish-changes`**.
+Do **not** fight the UI. Author the binding directly in `CustomControlDefaultConfigs`, on **all three
+form factors (0/1/2)**, with the control's static input-property values. Importing a solution
+regenerates the `controldescriptionjson` from the XML — patching XML alone (e.g. a raw `update_record`)
+leaves stale JSON, so always go through **solution import with `--publish-changes`**.
 
 The classic UI will *still* show "no custom control" afterward — **it is an unreliable mirror; runtime is
 the source of truth.** Confirm by opening the table grid directly:
 `https://<org>.crm4.dynamics.com/main.aspx?pagetype=entitylist&etn=<table>`.
 
-Use the bundled script instead of hand-editing XML:
+### Preferred: checked-in binding solution template
+
+Use `pcf-control/binding-template/` plus `apply-grid-binding-template.mjs`. This builds a small
+unmanaged solution from repo-native XML, then imports it. It is the best default for this template
+because the binding shape is visible in source control and only the table/control/property values vary.
+
+From `pcf-control/`:
 
 ```bash
-node .claude/skills/pcf-develop-deploy/scripts/bind-grid.mjs \
+npm run bind -- -- \
+  --env https://<org>.crm.dynamics.com \
+  --table <prefix>_<table> \
+  --table-display-name "<Table Display Name>" \
+  --table-collection-name "<Table Display Plural>" \
+  --server-base-url https://<id>-3101.euw.devtunnels.ms \
+  --state-key <key> \
+  --auto-refresh-seconds 30
+```
+
+Optional overrides:
+
+```bash
+  --control bridge_Bridge.SmokeTestPanel \
+  --dataset bridgeGrid \
+  --agent-id T_<guid> \
+  --solution BridgeGridBinding_<table>
+```
+
+Use `--pack-only` to generate and pack the solution without importing it. The script requires
+`--table-display-name` so the import does not accidentally relabel the table; pass the existing table
+display names.
+
+**Once bound, the binding persists across normal code pushes** — a version bump + push is enough. Only
+re-run binding when the hosting table changes, the static property values change, or the manifest
+property/data-set names change.
+
+### Fallback: export/patch/import round trip
+
+Use `bind-grid.mjs` only when the template import does not work for an unusual table/solution shape, or
+when you must preserve and patch a carrier solution's already-exported table XML instead of importing a
+minimal binding solution. It exports a solution containing the table, injects/replaces the binding, and
+imports it again.
+
+```bash
+npm run bind:roundtrip -- -- \
   --env https://<org>.crm.dynamics.com \
   --table <prefix>_<table> \
   --control <prefix>_<Namespace>.<Constructor> \
@@ -73,10 +114,7 @@ node .claude/skills/pcf-develop-deploy/scripts/bind-grid.mjs \
   --prop stateKey=<key> \
   --prop autoRefreshSeconds=30
 ```
-(`pcf-control/package.json` also exposes this as an `npm run bind -- …` alias.)
-
-**Once bound, the binding persists across normal code pushes** — a version bump + push is enough. Only
-re-run `bind-grid.mjs` when a manifest **property** or the `data-set`/`of-type` changes.
+The doubled `-- --` is intentional for npm argument forwarding on Windows/npm 11.
 
 ### Binding gotchas that make it silently fail (symptom: the DEFAULT grid renders, no error)
 
@@ -84,16 +122,15 @@ re-run `bind-grid.mjs` when a manifest **property** or the `data-set`/`of-type` 
   `pac solution unpack` splits each table into `Entities/<table>/Entity.xml`; the block must be a sibling
   of `<FormXml>`/`<SavedQueries>`/`<RibbonDiffXml>` (i.e. right before `</Entity>`), **not** a child of the
   inner `<entity Name="…">`. Put it inside `<entity>` and **import silently drops it** → default grid.
-  `bind-grid.mjs` now handles both the split layout and the correct placement.
+  The checked-in template and both scripts put it in the correct place.
 - **Do NOT delete the carrier solution.** The binding rides in whatever unmanaged solution you imported it
-  through (`--create-solution` makes a temp `BindGridTemp…`). Deleting that solution **removes the
-  `CustomControlDefaultConfig`** and the default grid comes back. Keep it, or bind through a solution you
-  intend to keep (`--solution <name>`).
+  through. Deleting that solution **removes the `CustomControlDefaultConfig`** and the default grid comes
+  back. Use a stable solution name with the template path; do not treat it as disposable after import.
 - **Verify by export, not by the classic UI.** Re-export the solution, unpack, and confirm a
   `<CustomControlDefaultConfigs>` block sits under the table's outer `<Entity>`. The classic UI lies either
   way; a runtime hard-reload (Ctrl+Shift+R) or **Publish all customizations** shows the real result.
-- **Windows:** `bind-grid.mjs` shells out to `pac` — on Windows the CLI is `pac.cmd`, which Node can only
-  spawn via a shell; the script handles this. If it errors `spawnSync pac ENOENT`, your `pac` isn't the
+- **Windows:** both scripts shell out to `pac` — on Windows the CLI is `pac.cmd`, which Node can only
+  spawn via a shell; the scripts handle this. If they error `spawnSync pac ENOENT`, your `pac` isn't the
   `.cmd` on PATH.
 
 ## Prerequisites

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Entity>
+  <Name LocalizedName="{{TABLE_DISPLAY_NAME}}" OriginalName="{{TABLE_DISPLAY_NAME}}">{{TABLE_LOGICAL_NAME}}</Name>
+  <EntityInfo>
+    <entity Name="{{TABLE_LOGICAL_NAME}}">
+      <LocalizedNames>
+        <LocalizedName description="{{TABLE_DISPLAY_NAME}}" languagecode="1033" />
+      </LocalizedNames>
+      <LocalizedCollectionNames>
+        <LocalizedCollectionName description="{{TABLE_COLLECTION_NAME}}" languagecode="1033" />
+      </LocalizedCollectionNames>
+    </entity>
+  </EntityInfo>
+  <FormXml />
+  <SavedQueries />
+  <RibbonDiffXml />
+  {{CUSTOM_CONTROL_DEFAULT_CONFIGS}}
+</Entity>

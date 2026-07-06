@@ -1,0 +1,8 @@
+          <customControl formFactor="{{FORM_FACTOR}}" name="{{CONTROL_NAME}}">
+            <parameters>
+              <data-set name="{{DATASET_NAME}}">
+                <columnsDefaultView />
+              </data-set>
+{{PROPERTY_ELEMENTS}}
+            </parameters>
+          </customControl>

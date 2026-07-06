@@ -55,6 +55,7 @@ function parseArgs(argv) {
   const out = { prop: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
+    if (a === "--") continue;
     if (!a.startsWith("--")) continue;
     const key = a.slice(2);
     if (key === "create-solution") { out.createSolution = true; continue; }

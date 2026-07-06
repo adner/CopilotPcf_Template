@@ -11,7 +11,9 @@
     "start": "pcf-scripts start",
     "start:watch": "pcf-scripts start watch",
     "refreshTypes": "pcf-scripts refreshTypes",
-    "bind": "node ../.agents/skills/pcf-develop-deploy/scripts/bind-grid.mjs"
+    "bind": "node ../.agents/skills/pcf-develop-deploy/scripts/apply-grid-binding-template.mjs",
+    "bind:template": "node ../.agents/skills/pcf-develop-deploy/scripts/apply-grid-binding-template.mjs",
+    "bind:roundtrip": "node ../.agents/skills/pcf-develop-deploy/scripts/bind-grid.mjs"
   },
   "dependencies": {
   },

@@ -33,8 +33,9 @@ npm run serve         # Streamable HTTP on :3101/mcp  (health: /health)
 npm run typecheck     # tsc on BOTH tsconfigs (server + DOM viewer)
 ```
 
-In `pcf-control/`: `npm install`, `npm run build`, `npm run bind -- …` (grid binding; see
-`pcf-develop-deploy`). **No test runner** — verification is `npm run probe` + the manual loop.
+In `pcf-control/`: `npm install`, `npm run build`, `npm run bind -- -- …` (solution-template grid
+binding; see `pcf-develop-deploy`). **No test runner** — verification is `npm run probe` + the manual
+loop.
 
 ## Always-true conventions
 
