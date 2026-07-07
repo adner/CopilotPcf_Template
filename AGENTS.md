@@ -1,4 +1,4 @@
-# AGENT.md
+# AGENTS.md
 
 Guidance for agents working in this repo. **Authoring rule:** procedural knowledge → a skill in
 `.agents/skills/`; always-true, load-bearing facts → this file; human narrative (diagrams, setup

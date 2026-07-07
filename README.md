@@ -98,4 +98,4 @@ Agents load these on demand while you build a demo from this template:
    `server.ts`; re-run the agent sync.
 2. Replace the smoke-test panel in `pcf-control/` with your component; keep the bridge wiring.
 3. Create supporting Dataverse tables via the Dataverse MCP server.
-4. Fill in the "fill in as your demo grows" section of `AGENT.md`.
+4. Fill in the "fill in as your demo grows" section of `AGENTS.md`.
